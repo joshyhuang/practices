@@ -44,6 +44,7 @@ public class GithubUser {
     private String avatar_url;
     private String location;
     private String email;
+    private String url;
     private OffsetDateTime created_at;
 
     public String getLogin() {
@@ -93,4 +94,12 @@ public class GithubUser {
     public void setCreated_at(OffsetDateTime created_at) {
         this.created_at = created_at;
     }
+
+    public String getUrl() {
+        return url;
+    }
+    public void setUrl(String url) {
+        this.url = url;
+    }
 }
+

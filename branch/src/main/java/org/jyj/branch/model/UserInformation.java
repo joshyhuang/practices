@@ -1,12 +1,16 @@
 package org.jyj.branch.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.jyj.branch.JsonUtil;
+import org.jyj.branch.model.github.GithubRepo;
 import org.jyj.branch.model.github.GithubUser;
-import org.jyj.branch.service.GitHubUserService;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@JsonSerialize(include = JsonSerialize.Inclusion.ALWAYS)
 public class UserInformation {
 
     String user_name;
@@ -15,6 +19,7 @@ public class UserInformation {
     String geo_location;
     String url;
     String created_at;
+    String email;
     List<UserRepository> repos;
 
     public String getUser_name() {
@@ -65,6 +70,14 @@ public class UserInformation {
         this.created_at = created_at;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public List<UserRepository> getRepos() {
         return repos;
     }
@@ -74,23 +87,36 @@ public class UserInformation {
     }
 
 
-    public static UserInformation convert(GithubUser user, Map repos) {
+    public static UserInformation convert(GithubUser user, List<GithubRepo> repos) {
         UserInformation userInformation = null;
         if (user != null) {
             userInformation = new UserInformation();
             userInformation.setUser_name(user.getLogin());
             userInformation.setDisplay_name(user.getName());
             userInformation.setAvatar(user.getAvatar_url());
+            userInformation.setUrl(user.getUrl());
             userInformation.setGeo_location(user.getLocation());
-            userInformation.setCreated_at(user.getCreated_at().toString());
+            userInformation.setEmail(user.getEmail());
+            if (user.getCreated_at() != null) {
+                String formatDate = user.getCreated_at().format(DateTimeFormatter.RFC_1123_DATE_TIME);
+                userInformation.setCreated_at(formatDate);
+            }
+
             List<UserRepository> repositories = new ArrayList<>();
             if (repos != null) {
-                //
+                for (GithubRepo repo : repos) {
+                    repositories.add(new UserRepository(repo.getName(), repo.getOwner().getUrl()));
+                }
                 userInformation.setRepos(repositories);
             }
 
         }
 
         return userInformation;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtil.toJson(this, true);
     }
 }
